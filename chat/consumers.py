@@ -1,6 +1,6 @@
 import json
 
-from asgiref import sync_to_async
+from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 
