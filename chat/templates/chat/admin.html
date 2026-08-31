@@ -9,18 +9,24 @@
 
             <div class="mt-6 mb-4">
                 {% for user in users %}
-                    <div class="grid grid-cols-4 gap-4 py-2 rounded-l {% cycle 'bg-gray-100' '' %}">
-                        <p class="px-2">{{ user.name }}</p>
+                    <div class="rounded-lg grid grid-cols-4 gap-4 py-2 rounded-l {% cycle 'bg-gray-100' '' %}">
+                        <p class="px-2">
+                            <a href="{% url 'chat:user_details' user.pk %}">
+                                {{ user.name }}
+                            </a>
+                        </p>
                         <p class="px-2">{{ user.email }}</p>
                         <p class="px-2">{{ user.get_role_display }}</p>
                         <p class="px-2 text-right">
-                            <a href="#" class="underline">Edit</a>
+                            {% if perms.user.edit_user %}
+                                <a href="{% url 'chat:edit_user' user.pk %}" class="underline">Edit</a>
+                            {% endif %}
                         </p>
                     </div>
                 {% endfor %}
             </div>
 
-            <a href="#" class="inline-block py-2 px-6 bg-rose-600 text-white rounded-xl">Add User</a>
+            <a href="{% url 'chat:add_user' %}" class="inline-block py-2 px-6 bg-rose-600 text-white rounded-xl">Add User</a>
         </div>
    {% endif %}
 
