@@ -10,6 +10,10 @@
                         </p>
 
                         <a href="{% url 'chat:room' room.uuid %}" class="inline-block py-2 px-6 mt-4 bg-emerald-800 text-white rounded-xl">Join</a>
+                        
+                        {% if perms.user.delete_room %}
+                            <a href="{% url 'chat:delete_room' room.uuid %}" class="inline-block py-2 px-6 mt-4 bg-rose-800 text-white rounded-xl">Delete</a>
+                        {% endif %}
                     </div>
                 {% endfor %}
         </div>

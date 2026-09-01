@@ -44,6 +44,21 @@ def room(request, uuid):
     })
 
 @login_required
+def delete_room(request, uuid):
+    if request.user.has_perm('room.delete_room'):
+        room = Room.objects.get(uuid=uuid)
+        room.delete()
+
+        messages.success(request, 'Room deleted.')
+        
+        return redirect('/chat-admin/')
+    else:
+        messages.error(request, 'You do not have permission to delete rooms.')
+        
+        return redirect('/chat-admin/')
+
+
+@login_required
 def add_user(request):
     if request.user.has_perm('user.add_user'):
         if request.method == 'POST':

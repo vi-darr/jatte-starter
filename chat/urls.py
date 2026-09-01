@@ -11,4 +11,5 @@ urlpatterns = [
     path('chat-admin/user/<uuid:uuid>/', views.user_details, name='user_details'),
     path('chat-admin/user/<uuid:uuid>/edit/', views.edit_user, name='edit_user'),
     path('rooms/<str:uuid>/', views.room, name='room'),
+    path('rooms/<str:uuid>/delete/', views.delete_room, name='delete_room'),
 ]
