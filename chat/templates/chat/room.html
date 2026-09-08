@@ -27,11 +27,11 @@
                 {% endif %}
 
                 <div>
-                    <div class="p-4 {% if message.created_by %}bg-blue-400 rounded-l-lg rounded-br-lg{% else %}bg-gray-300 rounded-r-lg rounded-bl-lg{% endif %} w-fit">
+                    <div class="p-4 {% if message.created_by %}bg-blue-400 rounded-l-lg rounded-br-lg{% else %}bg-gray-300 rounded-r-lg rounded-bl-lg{% endif %} w-fit wrap-anywhere max-w-[900px]">
                         <p class="text-sm">{{ message.body }}</p>
                     </div>
 
-                    <span class="text-xs text-gray-500 leading-none">{{ message.created_at|timesince }} ago</span>
+                    <span class="text-xs text-gray-500 leading-none">{{ message.created_at|date:"H:i" }}</span>
                 </div>
 
                 {% if message.created_by %}

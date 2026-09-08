@@ -21,6 +21,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
 
+        # If this is a reconnecting client (room already has messages),
+        # send the message history so they can see previous conversation
+        messages = await self.get_message_history()
+        if messages:
+            await self.send(text_data=json.dumps({
+                'type': 'chat_history',
+                'messages': messages
+            }))
+
         # Inform user
         if self.user.is_staff:
             await self.channel_layer.group_send(
@@ -59,7 +68,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'name': name,
                     'agent': agent,
                     'initials': initials(name),
-                    'created_at': timesince(new_message.created_at)
+                    'created_at': new_message.created_at.strftime('%H:%M')
                 }
             )
 
@@ -107,6 +116,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @sync_to_async
     def get_room(self):
         self.room = Room.objects.get(uuid=self.room_name)
+
+    @sync_to_async
+    def get_message_history(self):
+        """Return all messages for this room so a reconnecting client
+        can see the previous conversation."""
+        messages = self.room.messages.all().order_by('created_at')
+        result = []
+        for msg in messages:
+            result.append({
+                'message': msg.body,
+                'name': msg.sent_by,
+                'agent': str(msg.created_by.pk) if msg.created_by else '',
+                'initials': initials(msg.sent_by),
+                'created_at': msg.created_at.strftime('%H:%M'),
+            })
+        return result
 
     @sync_to_async
     def create_message(self, sent_by, message, agent):

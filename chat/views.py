@@ -15,9 +15,27 @@ def create_room(request, uuid):
     name = request.POST.get('name', '')
     url = request.POST.get('url', '')
 
-    Room.objects.create(uuid=uuid, client=name, url=url)
+    room, created = Room.objects.get_or_create(
+        uuid=uuid,
+        defaults={'client': name, 'url': url}
+    )
 
-    return JsonResponse({'message': 'room created'})
+    # If reconnecting to an existing room, reopen it
+    if not created and room.status == Room.CLOSED:
+        room.status = Room.WAITING
+        room.save()
+
+    return JsonResponse({'message': 'room created' if created else 'room exists'})
+
+@require_POST
+def close_room(request, uuid):
+    try:
+        room = Room.objects.get(uuid=uuid)
+        room.status = Room.CLOSED
+        room.save()
+        return JsonResponse({'message': 'room closed'})
+    except Room.DoesNotExist:
+        return JsonResponse({'message': 'room not found'}, status=404)
 
 
 @login_required
