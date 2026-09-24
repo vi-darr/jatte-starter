@@ -17,6 +17,12 @@
 
     <hr class="mb-6">
 
+    {% if room.status == 'active' %}
+        <button type="button" id="close_room_btn" class="mb-6 py-2 px-6 bg-gray-600 text-white rounded-xl ml-auto">
+            Close Room
+        </button>
+    {% endif %}
+
     <div id="chat_log" class="mb-4 p-4 bg-gray-100 rounded-xl h-[300px] overflow-y-auto flex flex-col flex-grow">
         {% for message in room.messages.all %}
             <div class="flex w-full max-w-md mt-2 space-x-3 {% if message.created_by %}ml-auto justify-end{% endif %}">
@@ -49,6 +55,55 @@
             Send
         </button>
     {% endif %}
+
+    <button type="button" id="open_summary_modal" class="py-2 px-6 bg-indigo-600 text-white rounded-xl">
+        Write Summary
+    </button>
+
+    <!-- Summary Modal Overlay -->
+    <div id="summary_modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4 p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Conversation Summary</h2>
+                <button type="button" id="close_summary_modal" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+            </div>
+
+            <!-- Other agents' summaries (read-only previews) -->
+            {% if other_summaries %}
+                <div class="mb-5">
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Other Agent Summaries</h3>
+                    {% for other in other_summaries %}
+                        <div class="mb-3 border border-gray-200 rounded-xl p-4 bg-gray-50">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-semibold text-indigo-700">{{ other.agent.name }}</span>
+                                <span class="text-xs text-gray-400">{{ other.updated_at|date:"H:i" }}</span>
+                            </div>
+                            <p class="text-sm text-gray-700 whitespace-pre-line">{{ other.summary }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+                <hr class="mb-4 border-gray-200">
+            {% endif %}
+
+            <!-- Current agent's editable summary -->
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Your Summary</h3>
+            <form method="POST" action="{% url 'chat:save_summary' room.uuid %}">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <textarea
+                        name="summary"
+                        id="summary_textarea"
+                        rows="12"
+                        class="w-full p-4 bg-gray-100 rounded-xl resize-y text-sm font-mono"
+                        placeholder="• Enter summary points here...">{{ summary_form.initial.summary|default:"• " }}</textarea>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" id="cancel_summary_modal" class="py-2 px-6 bg-gray-300 text-gray-700 rounded-xl hover:bg-gray-400">Cancel</button>
+                    <button type="submit" class="py-2 px-6 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700">Save Summary</button>
+                </div>
+            </form>
+        </div>
+    </div>
 {% endblock %}
 
 {% block scripts %}
@@ -59,4 +114,117 @@
 
         <script src="{% static 'js/main_admin.js' %}"></script>
     {% endif %}
+
+    <script>
+        // Summary modal controls
+        const modal = document.getElementById('summary_modal');
+        const openBtn = document.getElementById('open_summary_modal');
+        const closeBtn = document.getElementById('close_summary_modal');
+        const cancelBtn = document.getElementById('cancel_summary_modal');
+        const textarea = document.getElementById('summary_textarea');
+
+        function openModal() {
+            modal.classList.remove('hidden');
+            textarea.focus();
+            // Place cursor at end of content
+            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+        }
+
+        if (openBtn) openBtn.addEventListener('click', openModal);
+        if (closeBtn) closeBtn.addEventListener('click', closeModal);
+        if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+        // Close on backdrop click
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) closeModal();
+            });
+        }
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+                closeModal();
+            }
+        });
+
+        // Auto-insert bullet point on Enter
+        if (textarea) {
+            textarea.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const start = this.selectionStart;
+                    const value = this.value;
+                    const newText = value.substring(0, start) + '\n• ' + value.substring(this.selectionEnd);
+                    this.value = newText;
+                    const newPos = start + 3; // after "\n• "
+                    this.setSelectionRange(newPos, newPos);
+                }
+            });
+        }
+
+        // Close Room button handler
+        const closeRoomBtn = document.getElementById('close_room_btn');
+
+        function getCsrfCookie() {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, 'csrftoken'.length + 1) === 'csrftoken=') {
+                        cookieValue = decodeURIComponent(cookie.substring('csrftoken='.length));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        if (closeRoomBtn) {
+            closeRoomBtn.addEventListener('click', function() {
+                if (!confirm('Are you sure you want to close this room? The client will be prompted to rate the service.')) {
+                    return;
+                }
+
+                const roomUuid = JSON.parse(document.getElementById('room_uuid').textContent);
+
+                fetch(`/api/close_room/${roomUuid}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfCookie()
+                    }
+                })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    // Disable chat input
+                    const input = document.getElementById('chat_message_input');
+                    const submitBtn = document.getElementById('chat_message_submit');
+                    if (input) input.disabled = true;
+                    if (submitBtn) submitBtn.disabled = true;
+
+                    closeRoomBtn.disabled = true;
+                    closeRoomBtn.textContent = 'Room Closed';
+                    closeRoomBtn.classList.remove('bg-gray-600');
+                    closeRoomBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+
+                    // Show confirmation in chat log
+                    const chatLog = document.getElementById('chat_log');
+                    if (chatLog) {
+                        chatLog.innerHTML += '<p class="mt-2 bg-gray-300 p-1 rounded-xl text-center text-gray-600">Room closed. The client has been prompted to rate the service.</p>';
+                        chatLog.scrollTop = chatLog.scrollHeight;
+                    }
+                })
+                .catch(function(err) {
+                    alert('Failed to close room. Please try again.');
+                    console.error(err);
+                });
+            });
+        }
+    </script>
+
 {% endblock %}

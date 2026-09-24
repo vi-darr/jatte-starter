@@ -23,9 +23,15 @@ function scrollToBottom() {
 }
 
 function sendMessage() {
+    const message = chatInputElement.value.trim()
+
+    if (!message) {
+        return
+    }
+
     chatSocket.send(JSON.stringify({
         'type': 'message',
-        'message': chatInputElement.value,
+        'message': message,
         'name': document.querySelector('#user_name').textContent.replaceAll('"', ''),
         'agent': document.querySelector('#user_id').textContent.replaceAll('"', ''),
     }))

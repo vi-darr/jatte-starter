@@ -8,6 +8,7 @@ let chatName = ''
 let chatSocket = null
 let chatWindowUrl = window.location.href
 let chatUuid = null
+let ratingValues = {}
 
 /**
  * Session persistence helpers
@@ -67,8 +68,14 @@ const chatNameElement = document.querySelector('#chat_name')
 const chatLogElement = document.querySelector('#chat_log')
 const chatInputElement = document.querySelector('#chat_message_input')
 const chatSubmitElement = document.querySelector('#chat_message_submit')
-const closeBtn = document.getElementById("closeBtn")
-const fullscreenBtn = document.getElementById("fullscreenBtn")
+const closeBtn = document.querySelector("#closeBtn")
+const fullscreenBtn = document.querySelector("#fullscreenBtn")
+const chatRatingElement = document.querySelector('#chat_rating')
+const ratingSubmitBtn = document.querySelector('#rating_submit')
+const ratingSkipBtn = document.querySelector('#rating_skip')
+const ratingCommentElement = document.querySelector('#rating_comment')
+const ratingThankYouElement = document.querySelector('#rating_thank_you')
+const ratingErrorElement = document.querySelector('#rating_error')
 
 /**
  * Functions
@@ -95,9 +102,15 @@ function getCookie(name) {
 }
 
 function sendMessage() {
+    const message = chatInputElement.value.trim()
+
+    if (!message) {
+        return
+    }
+
     chatSocket.send(JSON.stringify({
         'type': 'message',
-        'message': chatInputElement.value,
+        'message': message,
         'name': chatName,
     }))
 
@@ -194,9 +207,100 @@ function onChatMessage(data) {
                     </div>
                 </div>`
         }
+    } else if (data.type == 'room_closed') {
+        chatLogElement.innerHTML += `<p class="mt-2 bg-gray-300 p-1 rounded-xl text-center text-gray-600">The conversation has been closed.</p>`
+        showRatingForm()
     }
 
     scrollToBottom()
+
+    saveSession()  // Update timestamp to keep session alive
+}
+
+function showRatingForm() {
+    chatRoomElement.classList.add('hidden')
+    chatRatingElement.classList.remove('hidden')
+    ratingValues = {}
+    initStarRatings()
+}
+
+function initStarRatings() {
+    document.querySelectorAll('.star-rating').forEach(function(group) {
+        const field = group.dataset.field
+        const buttons = group.querySelectorAll('.star-btn')
+
+        buttons.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const value = parseInt(btn.dataset.value)
+                ratingValues[field] = value
+
+                buttons.forEach(function(b) {
+                    const v = parseInt(b.dataset.value)
+                    if (v <= value) {
+                        b.classList.remove('text-gray-300')
+                        b.classList.add('text-yellow-400')
+                    } else {
+                        b.classList.remove('text-yellow-400')
+                        b.classList.add('text-gray-300')
+                    }
+                })
+            })
+        })
+    })
+}
+
+async function submitRating() {
+    if (!ratingValues.overall_rating) {
+        ratingErrorElement.textContent = 'Please select an overall rating.'
+        ratingErrorElement.classList.remove('hidden')
+        return
+    }
+
+    ratingErrorElement.classList.add('hidden')
+
+    const payload = {
+        overall_rating: ratingValues.overall_rating,
+        responsiveness: ratingValues.responsiveness || null,
+        helpfulness: ratingValues.helpfulness || null,
+        comment: ratingCommentElement.value.trim(),
+    }
+
+    try {
+        const response = await fetch(`/api/submit_rating/${chatUuid}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify(payload),
+        })
+
+        const data = await response.json()
+
+        if (response.ok) {
+            ratingSubmitBtn.classList.add('hidden')
+            ratingSkipBtn.classList.add('hidden')
+            ratingThankYouElement.classList.remove('hidden')
+            clearSession()
+
+            setTimeout(function() {
+                chatRatingElement.classList.add('hidden')
+                chatIconElement.classList.remove('hidden')
+            }, 2000)
+        } else {
+            ratingErrorElement.textContent = data.error || 'Something went wrong.'
+            ratingErrorElement.classList.remove('hidden')
+        }
+    } catch (err) {
+        ratingErrorElement.textContent = 'Network error. Please try again.'
+        ratingErrorElement.classList.remove('hidden')
+    }
+}
+
+function handleRatingSkip() {
+    chatRatingElement.classList.add('hidden')
+    chatIconElement.classList.remove('hidden')
+    clearSession()
 }
 
 function connectWebSocket() {
@@ -228,7 +332,11 @@ async function joinChatRoom() {
         return
     }
 
-    chatName = chatNameElement.value
+    chatName = chatNameElement.value.trim()
+
+    if (!chatName) {
+        return
+    }
     
     console.log('Join as:', chatName)
     console.log('Room UUID:', chatUuid)
@@ -286,7 +394,7 @@ async function reconnectChatRoom(session) {
     saveSession()
 
     // Show chat room directly, skip welcome screen    
-    chatWelcomeElement.classList.add('hidden')    
+    chatWelcomeElement.classList.add('hidden') 
 
     connectWebSocket()
 }
@@ -303,6 +411,7 @@ chatOpenElement.onclick = function(e) {
     // If already connected, go straight back to the chat room
     if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
         chatRoomElement.classList.remove('hidden')
+        scrollToBottom()
     } else {
         chatWelcomeElement.classList.remove('hidden')
     }
@@ -312,6 +421,12 @@ chatOpenElement.onclick = function(e) {
 
 chatJoinElement.onclick = function(e) {
     e.preventDefault()
+
+    chatName = chatNameElement.value.trim()
+
+    if (!chatName) {
+        return
+    }
 
     chatWelcomeElement.classList.add('hidden')
     chatRoomElement.classList.remove('hidden')
@@ -366,7 +481,7 @@ fullscreenBtn.onclick = function(e) {
     e.preventDefault()
 
     if (!document.fullscreenElement) {
-        fullscreenBtn.textContent = "🗗"
+        fullscreenBtn.textContent = "※"
         fullscreenBtn.title = "Exit Fullscreen"
         chatElement.requestFullscreen()
     } else if (document.exitFullscreen) {
@@ -374,6 +489,20 @@ fullscreenBtn.onclick = function(e) {
         fullscreenBtn.title = "Fullscreen"
         document.exitFullscreen()
     }
+}
+
+ratingSubmitBtn.onclick = function(e) {
+    e.preventDefault()
+    
+    submitRating()
+    return false
+}
+
+ratingSkipBtn.onclick = function(e) {
+    e.preventDefault()
+
+    handleRatingSkip()
+    return false
 }
 
 /**

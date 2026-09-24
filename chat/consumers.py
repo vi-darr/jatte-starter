@@ -113,6 +113,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'type': 'users_update',
         }))
 
+    async def room_closed(self, event):
+        # Notify client that the room has been closed
+        await self.send(text_data=json.dumps({
+            'type': 'room_closed',
+        }))
+
     @sync_to_async
     def get_room(self):
         self.room = Room.objects.get(uuid=self.room_name)
