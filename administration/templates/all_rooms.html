@@ -1,0 +1,105 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="flex justify-between items-center">
+    <h1 class="text-2xl font-bold">All Rooms</h1>
+    <a href="{% url 'administration:dashboard' %}" class="text-sm text-gray-500 underline">&larr; Back to Dashboard</a>
+</div>
+
+<!-- Filters -->
+<details class="mt-6 bg-white">
+    <summary class="px-6 py-4 cursor-pointer text-sm font-semibold flex items-center">
+        <span>Filters ▼</span>
+    </summary>
+    <hr>
+    <div class="px-6 pb-6 pt-2">
+        <div class="flex flex-wrap items-end gap-4">
+            <div>
+                <label class="block text-sm font-medium mb-1">Date From</label>
+                <input type="date" id="filter-date-from" value="{{ current_date_from }}"
+                    class="border rounded px-3 py-2 text-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1">Date To</label>
+                <input type="date" id="filter-date-to" value="{{ current_date_to }}"
+                    class="border rounded px-3 py-2 text-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1">Agent</label>
+                <select id="filter-agent" class="border rounded px-3 py-2 text-sm">
+                    <option value="">All Agents</option>
+                    {% for agent in agents %}
+                        <option value="{{ agent.pk }}" {% if current_agent == agent.pk|slugify %}selected{% endif %}>
+                            {{ agent.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="filterRooms()"
+                    class="py-2 px-4 bg-rose-600 text-white rounded-xl text-sm">
+                    Filter
+                </button>
+                <button onclick="clearFilters()"
+                    class="py-2 px-4 bg-gray-200 text-gray-700 rounded-xl text-sm">
+                    Clear
+                </button>
+            </div>
+        </div>
+    </div>
+</details>
+<hr>
+
+<!-- Room list -->
+<div class="mt-6">
+    <div id="room-list-container">
+        {% include 'partials/recordlist.html' %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function getFilterParams() {
+        const dateFrom = document.getElementById('filter-date-from').value;
+        const dateTo = document.getElementById('filter-date-to').value;
+        const agent = document.getElementById('filter-agent').value;
+
+        const params = new URLSearchParams();
+        params.set('date_from', dateFrom);
+        params.set('date_to', dateTo);
+        if (agent) params.set('agent', agent);
+
+        return params;
+    }
+
+    function loadRoomPage(page) {
+        const container = document.getElementById('room-list-container');
+        container.style.opacity = '0.5';
+
+        const params = getFilterParams();
+        params.set('page', page);
+
+        fetch(`{% url 'administration:room_list_partial' %}?${params.toString()}`)
+            .then(response => response.text())
+            .then(html => {
+                container.innerHTML = html;
+                container.style.opacity = '1';
+            })
+            .catch(() => {
+                container.style.opacity = '1';
+            });
+    }
+
+    function filterRooms() {
+        loadRoomPage(1);
+    }
+
+    function clearFilters() {
+        document.getElementById('filter-date-from').value = 'date_from';
+        document.getElementById('filter-date-to').value = 'date_to';
+        document.getElementById('filter-agent').value = '';
+        loadRoomPage(1);
+    }
+</script>
+{% endblock %}

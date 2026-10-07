@@ -50,13 +50,11 @@ def close_room(request, uuid):
 
 
 @login_required
-def admin(request):
+def chat_admin(request):
     rooms = Room.objects.all()
-    users = User.objects.filter(is_staff=True)
 
     return render(request, 'chat/admin.html', {
         'rooms': rooms,
-        'users': users
     })
 
 @login_required

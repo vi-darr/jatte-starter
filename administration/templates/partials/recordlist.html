@@ -1,0 +1,110 @@
+<div class="overflow-x-auto">
+    <table class="w-full text-sm text-left">
+        <thead class="bg-gray-800 text-white">
+            <tr>
+                <th class="px-4 py-3 rounded-tl-lg">Room UUID</th>
+                <th class="px-4 py-3">Status</th>
+                <th class="px-4 py-3">Agent</th>
+                <th class="px-4 py-3">Rating</th>
+                <th class="px-4 py-3 rounded-tr-lg">Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for room in rooms %}
+                <tr class="border-b {% cycle 'bg-gray-50' 'bg-white' %}">
+                    <td class="px-4 py-3 font-mono text-xs">
+                        <a href="{% url 'chat:room' room.uuid %}" class="underline">{{ room.uuid }}</a>
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="inline-block px-2 py-1 rounded-full text-xs font-medium
+                            {% if room.status == 'active' %}
+                                bg-green-100 text-green-700
+                            {% elif room.status == 'waiting' %}
+                                bg-yellow-100 text-yellow-700
+                            {% else %}
+                                bg-gray-200 text-gray-600
+                            {% endif %}
+                        ">
+                            {{ room.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3">
+                        {% if room.agent %}
+                            {{ room.agent.name }}
+                        {% else %}
+                            <span class="text-gray-400 italic">Unassigned</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3">
+                        {% if room.rating %}
+                            <span class="font-semibold">{{ room.rating.overall_rating }}/5</span>
+                        {% else %}
+                            <span class="text-gray-400">—</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3">
+                        {% with summaries=room.summaries.all %}
+                            {% if summaries %}
+                                <details class="cursor-pointer">
+                                    <summary class="underline text-xs">
+                                        View {{ summaries|length }} summar{{ summaries|length|pluralize:"y,ies" }}
+                                    </summary>
+                                    <div class="mt-2 space-y-2">
+                                        {% for s in summaries %}
+                                            <div class="p-2 bg-gray-100 rounded text-xs">
+                                                <p class="font-medium mb-1">
+                                                    {{ s.agent.name|default:"Unknown" }} – {{ s.updated_at|date:"M d, Y H:i" }}
+                                                </p>
+                                                <p class="whitespace-pre-wrap">{{ s.summary|default:"No summary text." }}</p>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </details>
+                            {% else %}
+                                <span class="text-gray-400 text-xs">No summaries</span>
+                            {% endif %}
+                        {% endwith %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" class="px-4 py-6 text-center text-gray-500">No rooms found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if rooms.has_other_pages %}
+    <div class="flex justify-between items-center mt-4">
+        <div>
+            {% if rooms.has_previous %}
+                <button onclick="loadRoomPage({{ rooms.previous_page_number }})"
+                    class="py-2 px-4 bg-gray-800 text-white rounded-xl text-sm">
+                    &larr; Previous
+                </button>
+            {% else %}
+                <span class="inline-block py-2 px-4 bg-gray-300 text-gray-500 rounded-xl text-sm cursor-not-allowed">
+                    &larr; Previous
+                </span>
+            {% endif %}
+        </div>
+
+        <span class="text-sm text-gray-500">
+            Page {{ rooms.number }} of {{ rooms.paginator.num_pages }}
+        </span>
+
+        <div>
+            {% if rooms.has_next %}
+                <button onclick="loadRoomPage({{ rooms.next_page_number }})"
+                    class="py-2 px-4 bg-gray-800 text-white rounded-xl text-sm">
+                    Next &rarr;
+                </button>
+            {% else %}
+                <span class="inline-block py-2 px-4 bg-gray-300 text-gray-500 rounded-xl text-sm cursor-not-allowed">
+                    Next &rarr;
+                </span>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}

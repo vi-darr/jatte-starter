@@ -285,7 +285,7 @@ async function submitRating() {
 
             setTimeout(function() {
                 chatRatingElement.classList.add('hidden')
-                chatIconElement.classList.remove('hidden')
+                chatElement.classList.add('hidden')
             }, 2000)
         } else {
             ratingErrorElement.textContent = data.error || 'Something went wrong.'

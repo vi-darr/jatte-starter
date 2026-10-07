@@ -1,0 +1,74 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+   <h1 class="text-2xl">User {{ user.name }}</h1>
+
+   <hr class="my-6">
+
+   <!-- Agent Performance Summary -->
+   {% if total_ratings > 0 %}
+       <div class="mt-8 p-6 bg-white border border-gray-200 rounded-xl">
+           <h2 class="mb-4 text-lg"><strong>Performance Summary</strong></h2>
+
+           <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+               <div class="text-center p-3 bg-gray-50 rounded-xl">
+                   <p class="text-sm text-gray-500">Total Ratings</p>
+                   <p class="text-2xl font-bold text-gray-800">{{ total_ratings }}</p>
+               </div>
+               <div class="text-center p-3 bg-gray-50 rounded-xl">
+                   <p class="text-sm text-gray-500">Overall</p>
+                   <p class="text-2xl font-bold text-yellow-500">{{ averages.avg_overall|floatformat:1 }} ★</p>
+               </div>
+               {% if averages.avg_responsiveness %}
+               <div class="text-center p-3 bg-gray-50 rounded-xl">
+                   <p class="text-sm text-gray-500">Responsiveness</p>
+                   <p class="text-2xl font-bold text-yellow-500">{{ averages.avg_responsiveness|floatformat:1 }} ★</p>
+               </div>
+               {% endif %}
+               {% if averages.avg_helpfulness %}
+               <div class="text-center p-3 bg-gray-50 rounded-xl">
+                   <p class="text-sm text-gray-500">Helpfulness</p>
+                   <p class="text-2xl font-bold text-yellow-500">{{ averages.avg_helpfulness|floatformat:1 }} ★</p>
+               </div>
+               {% endif %}
+           </div>
+
+           <!-- Recent Ratings -->
+           {% if recent_ratings %}
+               <h3 class="mb-3 text-md font-semibold text-gray-600">Recent Ratings</h3>
+               <div class="space-y-2">
+                   {% for rating in recent_ratings %}
+                       <div class="flex items-center justify-between p-3 rounded-lg {% cycle 'bg-gray-50' 'bg-white' %}">
+                           <div>
+                               <span class="font-medium text-gray-800">{{ rating.client_name }}</span>
+                               <span class="text-xs text-gray-400 ml-2">{{ rating.created_at|timesince }} ago</span>
+                           </div>
+                           <div class="flex items-center gap-3">
+                               <span class="text-yellow-500 font-bold">{{ rating.overall_rating }}/5 ★</span>
+                               {% if rating.comment %}
+                                   <span class="text-xs text-gray-500 max-w-[200px] truncate" title="{{ rating.comment }}">"{{ rating.comment }}"</span>
+                               {% endif %}
+                           </div>
+                       </div>
+                   {% endfor %}
+               </div>
+           {% endif %}
+       </div>
+   {% else %}
+       <div class="mt-8 p-4 bg-gray-50 rounded-xl">
+           <p class="text-gray-500">No ratings received yet.</p>
+       </div>
+   {% endif %}
+
+   <hr class="my-6">
+
+   <div class="mt-8">
+        <h2 class="mb-4 text-lg"><strong>Rooms</strong></h2>
+
+        {% if rooms %}
+            {% include 'partials/room_grid.html' %}
+        {% else %}
+            <p>No rooms found for this user.</p>
+        {% endif %}
+    </div>
+{% endblock %}

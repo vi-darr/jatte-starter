@@ -20,7 +20,7 @@
                     <a href="{% url 'core:about' %}">About</a>
 
                     {% if user.is_authenticated %}
-                        <a href="{% url 'chat:admin' %}" class="inline-block py-4 px-6 bg-rose-800 text-white rounded-xl">Admin</a>
+                        <a href="{% url 'chat:chat_admin' %}" class="inline-block py-4 px-6 bg-rose-800 text-white rounded-xl">Admin</a>
                     {% endif %}
                 </div>
             </nav>

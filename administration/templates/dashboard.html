@@ -1,0 +1,217 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold">Administration Dashboard</h1>
+
+{% if perms.user.add_user %}
+        <div class="mt-8">
+            <h2 class="mb-4 text-lg"><strong>Users</strong></h2>
+
+            <div class="mt-6 mb-4">
+                {% for user in users %}
+                    <div class="rounded-lg grid grid-cols-4 gap-4 py-2 rounded-l {% cycle 'bg-gray-100' '' %}">
+                        <p class="px-2">
+                            <a href="{% url 'administration:user_details' user.pk %}">
+                                {{ user.name }}
+                            </a>
+                        </p>
+                        <p class="px-2">{{ user.email }}</p>
+                        <p class="px-2">{{ user.get_role_display }}</p>
+                        <p class="px-2 text-right">
+                            {% if perms.user.edit_user %}
+                                <a href="{% url 'administration:edit_user' user.pk %}" class="underline">Edit</a>
+                            {% endif %}
+                        </p>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <a href="{% url 'administration:add_user' %}" class="inline-block py-2 px-6 bg-rose-600 text-white rounded-xl">Add User</a>
+        </div>
+{% endif %}
+
+<div class="flex justify-between items-center mt-6">
+   <!-- Period filter buttons -->
+    <div class="flex space-x-2" id="period-filters">
+        <button onclick="filterPeriod('today')"
+            class="py-2 px-4 rounded-xl text-sm {% if current_period == 'today' %}bg-rose-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %}"
+            data-period="today">
+            Today
+        </button>
+        <button onclick="filterPeriod('week')"
+            class="py-2 px-4 rounded-xl text-sm {% if current_period == 'week' %}bg-rose-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %}"
+            data-period="week">
+            This Week
+        </button>
+        <button onclick="filterPeriod('month')"
+            class="py-2 px-4 rounded-xl text-sm {% if current_period == 'month' %}bg-rose-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %}"
+            data-period="month">
+            This Month
+        </button>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+    <!-- Room Stats -->
+    <div class="bg-white border rounded-xl p-6" id="rooms-card">
+        <h2 class="text-lg font-semibold mb-4">Rooms</h2>
+        <div class="space-y-2 text-sm">
+            <p>Total: <strong id="stat-total-rooms">{{ total_rooms }}</strong></p>
+            <p>Active: <strong id="stat-active-rooms">{{ active_rooms }}</strong></p>
+            <p>Waiting: <strong id="stat-waiting-rooms">{{ waiting_rooms }}</strong></p>
+            <p>Closed: <strong id="stat-closed-rooms">{{ closed_rooms }}</strong></p>
+        </div>
+    </div>
+
+    <!-- Activity -->
+    <div class="bg-white border rounded-xl p-6">
+        <h2 class="text-lg font-semibold mb-4">Activity</h2>
+        <div class="space-y-2 text-sm">
+            <p>Total Agents: <strong>{{ total_agents }}</strong></p>
+            <p>Active Agents: <strong id="stat-active-agents">{{ active_agents }}</strong></p>
+            <p>Total Ratings: <strong id="stat-total-ratings">{{ rating_agg.count }}</strong></p>
+        </div>
+    </div>
+
+    <!-- Average Ratings -->
+    <div class="bg-white border rounded-xl p-6" id="ratings-card">
+        <h2 class="text-lg font-semibold mb-4">Average Ratings</h2>
+        <div class="space-y-2 text-sm">
+            <p>Overall:
+                <strong id="stat-avg-overall">
+                    {% if rating_agg.avg_overall %}
+                        {{ rating_agg.avg_overall|floatformat:1 }} / 5
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </strong>
+            </p>
+            <p>Responsiveness:
+                <strong id="stat-avg-responsiveness">
+                    {% if rating_agg.avg_responsiveness %}
+                        {{ rating_agg.avg_responsiveness|floatformat:1 }} / 5
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </strong>
+            </p>
+            <p>Helpfulness:
+                <strong id="stat-avg-helpfulness">
+                    {% if rating_agg.avg_helpfulness %}
+                        {{ rating_agg.avg_helpfulness|floatformat:1 }} / 5
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </strong>
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="mt-10">
+     <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-semibold">Rooms</h2>
+        <a href="{% url 'administration:all_rooms' %}" class="text-sm underline">All Rooms &rarr;</a>
+    </div>
+    <div id="room-list-container">
+        {% include 'partials/recordlist.html' %}
+    </div>
+</div>
+<div class="mt-10">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-semibold">Recent Reports</h2>
+        <div class="space-x-2">
+            <a href="{% url 'administration:report_list' %}" class="inline-block py-2 px-4 bg-gray-200 rounded-xl text-sm">All Reports</a>
+            <a href="{% url 'administration:generate_report' %}" class="inline-block py-2 px-4 bg-rose-600 text-white rounded-xl text-sm">Generate Report</a>
+        </div>
+    </div>
+
+    {% if recent_reports %}
+        <div class="space-y-2">
+            {% for report in recent_reports %}
+                <div class="grid grid-cols-4 gap-4 py-3 px-4 rounded-lg {% cycle 'bg-gray-100' '' %}">
+                    <a href="{% url 'administration:report_detail' report.pk %}" class="text-rose-600 underline">{{ report.title }}</a>
+                    <p>{{ report.get_period_display }}</p>
+                    <p>{{ report.period_start|date:"M d, Y" }}</p>
+                    <p class="text-right text-gray-500 text-sm">{{ report.created_at|date:"M d, Y H:i" }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-gray-500">No reports generated yet.</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentPeriod = '{{ current_period|default:"today" }}';
+
+    function loadRoomPage(page, period) {
+        period = period || currentPeriod;
+        const container = document.getElementById('room-list-container');
+        container.style.opacity = '0.5';
+
+        fetch(`{% url 'administration:room_list_partial' %}?page=${page}&period=${period}`)
+            .then(response => response.text())
+            .then(html => {
+                container.innerHTML = html;
+                container.style.opacity = '1';
+            })
+            .catch(() => {
+                container.style.opacity = '1';
+            });
+    }
+
+    function formatRating(value) {
+        if (value === null || value === undefined) return 'N/A';
+        return parseFloat(value).toFixed(1) + ' / 5';
+    }
+
+    function filterPeriod(period) {
+        currentPeriod = period;
+
+        // Update button styles
+        document.querySelectorAll('#period-filters button').forEach(btn => {
+            if (btn.dataset.period === period) {
+                btn.className = 'py-2 px-4 rounded-xl text-sm bg-rose-600 text-white';
+            } else {
+                btn.className = 'py-2 px-4 rounded-xl text-sm bg-gray-200 text-gray-700';
+            }
+        });
+
+        // Fade cards while loading
+        document.getElementById('rooms-card').style.opacity = '0.5';
+        document.getElementById('ratings-card').style.opacity = '0.5';
+
+        // Fetch updated stats
+        fetch(`{% url 'administration:dashboard_stats' %}?period=${period}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('stat-total-rooms').textContent = data.total_rooms;
+                document.getElementById('stat-active-rooms').textContent = data.active_rooms;
+                document.getElementById('stat-waiting-rooms').textContent = data.waiting_rooms;
+                document.getElementById('stat-closed-rooms').textContent = data.closed_rooms;
+
+                document.getElementById('stat-active-agents').textContent = data.active_agents;
+                document.getElementById('stat-total-ratings').textContent = data.total_ratings;
+
+                document.getElementById('stat-avg-overall').textContent = formatRating(data.avg_overall);
+                document.getElementById('stat-avg-responsiveness').textContent = formatRating(data.avg_responsiveness);
+                document.getElementById('stat-avg-helpfulness').textContent = formatRating(data.avg_helpfulness);
+
+                document.getElementById('rooms-card').style.opacity = '1';
+                document.getElementById('ratings-card').style.opacity = '1';
+            })
+            .catch(() => {
+                document.getElementById('rooms-card').style.opacity = '1';
+                document.getElementById('ratings-card').style.opacity = '1';
+            });
+
+        // Reload room list table at page 1 with new filter
+        loadRoomPage(1, period);
+    }
+</script>
+{% endblock %}
