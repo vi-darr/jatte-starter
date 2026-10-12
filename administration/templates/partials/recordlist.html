@@ -4,6 +4,7 @@
             <tr>
                 <th class="px-4 py-3 rounded-tl-lg">Room UUID</th>
                 <th class="px-4 py-3">Status</th>
+                <th class="px-4 py-3">Created At</th>
                 <th class="px-4 py-3">Agent</th>
                 <th class="px-4 py-3">Rating</th>
                 <th class="px-4 py-3 rounded-tr-lg">Summary</th>
@@ -27,6 +28,9 @@
                         ">
                             {{ room.get_status_display }}
                         </span>
+                    </td>
+                    <td class="px-4 py-3">
+                        {{ room.created_at|date:"M d, H:i" }}
                     </td>
                     <td class="px-4 py-3">
                         {% if room.agent %}

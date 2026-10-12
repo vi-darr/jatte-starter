@@ -2,14 +2,11 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import Group
 from django.shortcuts import render, redirect
 from django.contrib import messages
 
-from .models import Room, Message, ConvoSummary, ServiceRating
+from .models import Room, ConvoSummary, ServiceRating
 from .forms import ConvoSummaryForm, ServiceRatingForm
-from account.models import User
-from account.forms import AddUserForm, EditUserForm
 
 @require_POST
 def create_room(request, uuid):
@@ -50,10 +47,10 @@ def close_room(request, uuid):
 
 
 @login_required
-def chat_admin(request):
-    rooms = Room.objects.all()
+def chat_agent(request):
+    rooms = Room.objects.filter(status__in=[Room.WAITING, Room.ACTIVE]).order_by('-created_at')
 
-    return render(request, 'chat/admin.html', {
+    return render(request, 'chat/chat_agent.html', {
         'rooms': rooms,
     })
 
@@ -89,107 +86,17 @@ def delete_room(request, uuid):
         room = Room.objects.get(uuid=uuid)
         if room.status != Room.CLOSED:
             messages.error(request, 'Cannot delete an active room.')
-            return redirect('/chat-admin/')
+            return redirect('/chat-agent/')
         else:
             room.delete()
 
         messages.success(request, 'Room deleted.')
         
-        return redirect('/chat-admin/')
+        return redirect('/chat-agent/')
     else:
         messages.error(request, 'You do not have permission to delete rooms.')
         
-        return redirect('/chat-admin/')
-
-
-@login_required
-def add_user(request):
-    if request.user.has_perm('user.add_user'):
-        if request.method == 'POST':
-            form = AddUserForm(request.POST)
-
-            if form.is_valid():
-                user = form.save(commit=False)
-                user.is_staff = True
-                user.set_password(request.POST.get('password'))
-                user.save()
-
-                if user.role == User.MANAGER:
-                    group = Group.objects.get(name='Managers')
-                    group.user_set.add(user)
-                else:
-                    group = Group.objects.get(name='Agents')
-                    group.user_set.add(user)
-
-                messages.success(request, 'User added successfully.')
-
-                return redirect('/chat-admin/')
-        else:
-            form = AddUserForm()
-
-        return render(request, 'chat/add_user.html', {
-            'form': form
-        })
-    else:
-        messages.error(request, 'You do not have permission to add users.')
-
-        return redirect('/chat-admin/')
-
-
-@login_required
-def user_details(request, uuid):
-    user = User.objects.get(pk=uuid)
-    rooms = user.rooms.all()
-
-    # Agent performance stats
-    agent_ratings = ServiceRating.objects.filter(agent=user)
-    total_ratings = agent_ratings.count()
-
-    if total_ratings > 0:
-        from django.db.models import Avg
-        averages = agent_ratings.aggregate(
-            avg_overall=Avg('overall_rating'),
-            avg_responsiveness=Avg('responsiveness'),
-            avg_helpfulness=Avg('helpfulness'),
-        )
-    else:
-        averages = {}
-
-    recent_ratings = agent_ratings[:10]
-
-    return render(request, 'chat/user_details.html', {
-        'user': user,
-        'rooms': rooms,
-        'total_ratings': total_ratings,
-        'averages': averages,
-        'recent_ratings': recent_ratings,
-    })
-
-@login_required
-def edit_user(request, uuid):
-    if request.user.has_perm('user.edit_user'):
-        user = User.objects.get(pk=uuid)
-
-        if request.method == 'POST':
-            form = EditUserForm(request.POST, instance=user)
-
-            if form.is_valid():
-                form.save()
-
-                messages.success(request, 'User updated successfully.')
-
-                return redirect('/chat-admin/')
-        else:
-            form = EditUserForm(instance=user)
-
-        return render(request, 'chat/edit_user.html', {
-            'user': user,
-            'form': form,
-        })
-    else:
-        messages.error(request, 'You do not have permission to edit users.')
-
-        return redirect('/chat-admin/')
+        return redirect('/chat-agent/')
 
 @login_required
 @require_POST

@@ -12,16 +12,16 @@
 
     <body>
         <div class="p-2">
-            <nav class="p-6 bg-rose-600 text-white flex justify-between items-center rounded-xl">
+            <nav class="p-6 bg-slate-700 text-white flex justify-between items-center rounded-xl">
                 <a href="{% url 'core:index' %}" class="text-xl">valCRI</a>
 
                 <div class="flex items-center space-x-4">
-                    <a href="{% url 'core:index' %}">Home</a>
-                    <a href="{% url 'core:about' %}">About</a>
-
-                    {% if user.is_authenticated %}
-                        <a href="{% url 'chat:chat_admin' %}" class="inline-block py-4 px-6 bg-rose-800 text-white rounded-xl">Admin</a>
-                    {% endif %}
+                    <!-- <a href="{% url 'core:index' %}">Home</a>
+                    <a href="{% url 'core:about' %}">About</a> -->
+                    
+                    <a href="{% url 'core:index' %}" class="hover:text-gray-200 transition-colors">Home</a>
+                    <a href="{% url 'core:services' %}" class="hover:text-gray-200 transition-colors">Services</a>
+                    <a href="{% url 'core:about' %}" class="hover:text-gray-200 transition-colors">About</a>
                 </div>
             </nav>
 
@@ -37,6 +37,7 @@
                 {% block content %}
                 {% endblock %}
             </main>
+            {% include 'partials/chat_bubble.html' %}
         </div>
 
         <footer class="py-12 px-6 bg-gray-800 text-white text-center text-xs">
@@ -44,6 +45,7 @@
         </footer>
 
         {% block scripts %}
+            <script src="{% static 'js/main.js' %}"></script>
         {% endblock %}
     </body>
 </html>

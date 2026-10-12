@@ -394,7 +394,7 @@ async function reconnectChatRoom(session) {
     saveSession()
 
     // Show chat room directly, skip welcome screen    
-    chatWelcomeElement.classList.add('hidden') 
+    chatWelcomeElement.classList.add('hidden')
 
     connectWebSocket()
 }
@@ -411,6 +411,7 @@ chatOpenElement.onclick = function(e) {
     // If already connected, go straight back to the chat room
     if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
         chatRoomElement.classList.remove('hidden')
+        chatElement.classList.add('w-[600px]')
         scrollToBottom()
     } else {
         chatWelcomeElement.classList.remove('hidden')
@@ -430,6 +431,7 @@ chatJoinElement.onclick = function(e) {
 
     chatWelcomeElement.classList.add('hidden')
     chatRoomElement.classList.remove('hidden')
+    chatElement.classList.add('w-[600px]')
 
     // Generate a new UUID only for brand new sessions
     if (!chatUuid) {
@@ -468,6 +470,7 @@ closeBtn.onclick = function(e) {
 
     chatRoomElement.classList.add('hidden')
     chatWelcomeElement.classList.add('hidden')
+    chatElement.classList.remove('w-[600px]')
     chatIconElement.classList.remove('hidden')
 
     if (document.fullscreenElement) {

@@ -1,5 +1,120 @@
 {% extends 'core/base.html' %}
 
+{% load static %}
+
 {% block content %}
-<h1 class="mb-6 text-2xl">About</h1>
+    <div class="mt-8 mb-16">
+        <!-- Hero Header -->
+        <div class="py-12 px-8 bg-gradient-to-r from-slate-700 to-slate-800 text-white rounded-2xl shadow-md mb-12">
+            <span class="inline-block px-3 py-1 mb-3 text-xs font-semibold tracking-wider uppercase bg-white/20 rounded-full">About Us</span>
+            <h1 class="text-4xl font-extrabold mb-4">Empowering Modern Businesses Through Technology</h1>
+            <p class="text-slate-200 text-lg max-w-3xl leading-relaxed">
+                valCRI is a full-service technology organization dedicated to delivering dependable, scalable, and secure digital infrastructure for modern enterprises, startups, and growing teams.
+            </p>
+        </div>
+
+        <!-- Mission & Vision Section with Placeholder Image -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-16">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-900 mb-4">Who We Are</h2>
+                <p class="text-slate-600 leading-relaxed mb-4">
+                    Founded on the principles of engineering excellence and client-first technical support, <strong>valCRI</strong> serves as a one-stop technology partner. We bridge the gap between complex computing infrastructure and intuitive business solutions.
+                </p>
+                <p class="text-slate-600 leading-relaxed mb-6">
+                    Whether you are an early-stage venture requiring bespoke web applications and reliable hosting, or an established enterprise needing high-speed remote desktop infrastructure and immediate technical troubleshooting, our engineers provide the dedicated expertise to keep your systems operating at peak performance.
+                </p>
+                <div class="p-4 bg-slate-100 border-l-4 border-slate-700 rounded-r-xl">
+                    <p class="text-slate-800 font-medium italic">
+                        "At valCRI, our mission is to eliminate technology friction so you can focus on building and scaling your core vision."
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex justify-center">
+                <img src="https://placehold.co/600x400/f1f5f9/334155?text=valCRI+Technology+Team" alt="valCRI Technology Team Placeholder" class="rounded-2xl shadow-md border border-slate-200 max-w-full h-auto">
+            </div>
+        </div>
+
+        <!-- Core Values Section -->
+        <div class="mb-16">
+            <h2 class="text-2xl font-bold text-slate-900 text-center mb-8">What Defines Us</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="p-6 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-slate-400 transition duration-200">
+                    <div class="w-12 h-12 mb-4 bg-slate-100 text-slate-700 rounded-lg flex items-center justify-center font-bold text-xl">
+                        1
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Technical Excellence</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        We leverage cutting-edge architecture, security best practices, and battle-tested industry standards across web development, cloud hosting, and system administration.
+                    </p>
+                </div>
+
+                <div class="p-6 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-slate-400 transition duration-200">
+                    <div class="w-12 h-12 mb-4 bg-slate-100 text-slate-700 rounded-lg flex items-center justify-center font-bold text-xl">
+                        2
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Rapid & Proactive Support</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        Downtime and software defects cost money and trust. Our dedicated engineering desk and live chat ensure fast response times and proactive problem prevention.
+                    </p>
+                </div>
+
+                <div class="p-6 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-slate-400 transition duration-200">
+                    <div class="w-12 h-12 mb-4 bg-slate-100 text-slate-700 rounded-lg flex items-center justify-center font-bold text-xl">
+                        3
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Transparent Partnership</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        No hidden fees or bloated jargon. We work hand-in-hand with clients, providing transparent diagnostics, fair pricing models, and clear documentation.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- What We Do Summary -->
+        <div class="p-8 bg-slate-50 border border-slate-200 rounded-2xl mb-12">
+            <h2 class="text-2xl font-bold text-slate-900 mb-4">Our Service Portfolio</h2>
+            <p class="text-slate-600 mb-6 leading-relaxed">
+                valCRI provides specialized capabilities covering every layer of your IT landscape:
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <a href="{% url 'core:service_website_building' %}" class="p-4 bg-white rounded-lg border border-slate-200 hover:border-slate-600 hover:shadow-sm transition block">
+                    <span class="font-bold text-slate-800 block mb-1">Website Building</span>
+                    <span class="text-xs text-slate-500">Custom sites, landing pages & CMS</span>
+                </a>
+                <a href="{% url 'core:service_hosting' %}" class="p-4 bg-white rounded-lg border border-slate-200 hover:border-slate-600 hover:shadow-sm transition block">
+                    <span class="font-bold text-slate-800 block mb-1">Hosting Services</span>
+                    <span class="text-xs text-slate-500">High-speed servers & managed cloud</span>
+                </a>
+                <a href="{% url 'core:service_webapp_development' %}" class="p-4 bg-white rounded-lg border border-slate-200 hover:border-slate-600 hover:shadow-sm transition block">
+                    <span class="font-bold text-slate-800 block mb-1">Web App Development</span>
+                    <span class="text-xs text-slate-500">Custom SaaS, APIs & business tools</span>
+                </a>
+                <a href="{% url 'core:service_remote_desktop' %}" class="p-4 bg-white rounded-lg border border-slate-200 hover:border-slate-600 hover:shadow-sm transition block">
+                    <span class="font-bold text-slate-800 block mb-1">Remote Desktop Services</span>
+                    <span class="text-xs text-slate-500">Virtual workstations & secure access</span>
+                </a>
+                <a href="{% url 'core:service_troubleshooting' %}" class="p-4 bg-white rounded-lg border border-slate-200 hover:border-slate-600 hover:shadow-sm transition block">
+                    <span class="font-bold text-slate-800 block mb-1">Troubleshooting</span>
+                    <span class="text-xs text-slate-500">Fast diagnosis, bug fixes & IT repair</span>
+                </a>
+                <a href="{% url 'core:services' %}" class="p-4 bg-slate-200 rounded-lg border border-slate-300 hover:bg-slate-300 transition flex items-center justify-center text-center">
+                    <span class="font-bold text-slate-800">View All Services &rarr;</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Call to Action Banner -->
+        <div class="text-center py-10 px-6 bg-white border border-slate-200 rounded-2xl shadow-sm">
+            <h3 class="text-2xl font-bold text-slate-900 mb-3">Ready to upgrade your tech infrastructure?</h3>
+            <p class="text-slate-600 max-w-xl mx-auto mb-6">
+                Reach out today or chat live with an engineer to discuss your project requirements or get immediate technical assistance.
+            </p>
+            <div class="flex justify-center gap-4">
+                <a href="{% url 'core:services' %}" class="py-3 px-6 bg-slate-700 hover:bg-slate-800 text-white font-medium rounded-xl transition duration-200 shadow-sm">
+                    Browse Services
+                </a>
+            </div>
+        </div>
+    </div>
 {% endblock %}

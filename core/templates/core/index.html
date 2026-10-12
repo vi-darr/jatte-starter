@@ -3,83 +3,177 @@
 {% load static %}
 
 {% block content %}
-    <div class="mt-12 py-12 px-8 grid grid-cols-5 gap-4 items-center border border-rose-200 rounded-xl">
-        <div class="col-span-2">
-            <img src="{% static 'images/header.png' %}">
+    <!-- Hero Section -->
+    <div class="mt-8 py-16 px-8 grid grid-cols-1 md:grid-cols-5 gap-8 items-center border border-slate-200 rounded-2xl bg-gradient-to-r from-slate-50 to-white shadow-sm">
+        <div class="md:col-span-2 text-center md:text-left">
+            <img src="{% static 'images/header.png' %}" alt="valCRI technology solutions" class="mx-auto rounded-xl max-h-72 object-contain" onerror="this.onerror=null; this.src='https://placehold.co/400x300/334155/ffffff?text=valCRI+Tech';">
         </div>
 
-        <div class="col-span-3">
-            <h1 class="mb-8 text-3xl">Welcome to Jatte</h1>
+        <div class="md:col-span-3">
+            <span class="inline-block px-3 py-1 mb-4 text-xs font-semibold tracking-wider text-slate-700 uppercase bg-slate-200 rounded-full">Your Reliable Technology Partner</span>
+            <h1 class="mb-4 text-4xl font-extrabold text-slate-900 leading-tight">
+                Empowering Your Digital Transformation with <span class="text-slate-700">valCRI</span>
+            </h1>
 
-            <h2 class="text-lg text-gray-500">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec accumsan tortor at sem fermentum tempor. Suspendisse vitae augue dolor. Nunc sed eleifend nulla.</h2>
-        </div>
-    </div>
+            <p class="mb-6 text-lg text-slate-600 leading-relaxed">
+                valCRI delivers comprehensive, end-to-end technology solutions tailored for modern businesses and individuals. From custom website building and high-performance hosting to full-stack web applications, secure remote desktop infrastructure, and 24/7 technical troubleshooting.
+            </p>
 
-    <div class="mt-12 py-12 px-8 grid grid-cols-3 gap-4 items-center">
-        <div class="text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 mb-8 text-rose-600 mx-auto">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-            </svg>  
-            
-            <h3 class="mb-4 text-xl text-gray-800">A dummy title</h3>
-
-            <p class="text-gray-500">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec accumsan tortor at sem fermentum tempor.</p> 
-        </div>
-
-        <div class="text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 mb-8 text-rose-600 mx-auto">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-            </svg>  
-            
-            <h3 class="mb-4 text-xl text-gray-800">A dummy title</h3>
-
-            <p class="text-gray-500">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec accumsan tortor at sem fermentum tempor.</p> 
-        </div>
-
-        <div class="text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 mb-8 text-rose-600 mx-auto">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-            </svg>  
-            
-            <h3 class="mb-4 text-xl text-gray-800">A dummy title</h3>
-
-            <p class="text-gray-500">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec accumsan tortor at sem fermentum tempor.</p> 
-        </div>
-
-        <div class="text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 mb-8 text-rose-600 mx-auto">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-            </svg>  
-            
-            <h3 class="mb-4 text-xl text-gray-800">A dummy title</h3>
-
-            <p class="text-gray-500">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec accumsan tortor at sem fermentum tempor.</p> 
-        </div>
-
-        <div class="text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 mb-8 text-rose-600 mx-auto">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-            </svg>  
-            
-            <h3 class="mb-4 text-xl text-gray-800">A dummy title</h3>
-
-            <p class="text-gray-500">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec accumsan tortor at sem fermentum tempor.</p> 
-        </div>
-
-        <div class="text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 mb-8 text-rose-600 mx-auto">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-            </svg>  
-            
-            <h3 class="mb-4 text-xl text-gray-800">A dummy title</h3>
-
-            <p class="text-gray-500">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec accumsan tortor at sem fermentum tempor.</p> 
+            <div class="flex flex-wrap gap-4">
+                <a href="{% url 'core:services' %}" class="py-3 px-6 bg-slate-700 hover:bg-slate-800 text-white font-medium rounded-xl transition duration-200 shadow-md">
+                    Explore Our Services
+                </a>
+                <a href="{% url 'core:about' %}" class="py-3 px-6 border border-slate-300 hover:bg-slate-100 text-slate-700 font-medium rounded-xl transition duration-200">
+                    Learn About valCRI
+                </a>
+            </div>
         </div>
     </div>
 
-    {% include 'partials/chat_bubble.html' %}
-{% endblock %}
+    <!-- Core Services Overview Section -->
+    <div class="mt-16">
+        <div class="text-center max-w-2xl mx-auto mb-12">
+            <h2 class="text-3xl font-bold text-slate-900 mb-3">Our Core Expertise</h2>
+            <p class="text-slate-600">Reliable, scalable, and modern technical services engineered to elevate your operations.</p>
+        </div>
 
-{% block scripts %}
-    <script src="{% static 'js/main.js' %}"></script>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- 1. Website Building -->
+            <div class="p-8 bg-white border border-slate-200 hover:border-slate-400 rounded-2xl shadow-sm hover:shadow-md transition duration-200 flex flex-col justify-between">
+                <div>
+                    <div class="w-14 h-14 mb-6 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="w-8 h-8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-.778.099-1.533.284-2.253" />
+                        </svg>
+                    </div>
+                    <h3 class="mb-3 text-xl font-bold text-slate-800">Website Building</h3>
+                    <p class="text-slate-600 leading-relaxed mb-6">
+                        Bespoke, responsive, and search-optimized websites designed to captivate your audience and accurately reflect your brand identity.
+                    </p>
+                </div>
+                <a href="{% url 'core:service_website_building' %}" class="inline-flex items-center text-slate-700 hover:text-slate-900 font-semibold">
+                    Read more 
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </a>
+            </div>
+
+            <!-- 2. Hosting Services -->
+            <div class="p-8 bg-white border border-slate-200 hover:border-slate-400 rounded-2xl shadow-sm hover:shadow-md transition duration-200 flex flex-col justify-between">
+                <div>
+                    <div class="w-14 h-14 mb-6 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="w-8 h-8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.75 5.25h12.5l2.1 3.3a4.5 4.5 0 01.9 2.7" />
+                        </svg>
+                    </div>
+                    <h3 class="mb-3 text-xl font-bold text-slate-800">Hosting Solutions</h3>
+                    <p class="text-slate-600 leading-relaxed mb-6">
+                        Ultra-fast, secure, and fully managed cloud and web hosting with high availability, automated backups, and 99.9% uptime guarantees.
+                    </p>
+                </div>
+                <a href="{% url 'core:service_hosting' %}" class="inline-flex items-center text-slate-700 hover:text-slate-900 font-semibold">
+                    Read more 
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </a>
+            </div>
+
+            <!-- 3. Web App Development -->
+            <div class="p-8 bg-white border border-slate-200 hover:border-slate-400 rounded-2xl shadow-sm hover:shadow-md transition duration-200 flex flex-col justify-between">
+                <div>
+                    <div class="w-14 h-14 mb-6 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="w-8 h-8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+                        </svg>
+                    </div>
+                    <h3 class="mb-3 text-xl font-bold text-slate-800">Web App Development</h3>
+                    <p class="text-slate-600 leading-relaxed mb-6">
+                        Interactive, robust web applications built with modern frameworks to streamline business workflows, customer portals, and SaaS platforms.
+                    </p>
+                </div>
+                <a href="{% url 'core:service_webapp_development' %}" class="inline-flex items-center text-slate-700 hover:text-slate-900 font-semibold">
+                    Read more 
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </a>
+            </div>
+
+            <!-- 4. Remote Desktop Services -->
+            <div class="p-8 bg-white border border-slate-200 hover:border-slate-400 rounded-2xl shadow-sm hover:shadow-md transition duration-200 flex flex-col justify-between">
+                <div>
+                    <div class="w-14 h-14 mb-6 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="w-8 h-8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0H3" />
+                        </svg>
+                    </div>
+                    <h3 class="mb-3 text-xl font-bold text-slate-800">Remote Desktop Services</h3>
+                    <p class="text-slate-600 leading-relaxed mb-6">
+                        Secure, virtualized workstation infrastructure enabling your team to collaborate productively from anywhere in the world.
+                    </p>
+                </div>
+                <a href="{% url 'core:service_remote_desktop' %}" class="inline-flex items-center text-slate-700 hover:text-slate-900 font-semibold">
+                    Read more 
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </a>
+            </div>
+
+            <!-- 5. Troubleshooting -->
+            <div class="p-8 bg-white border border-slate-200 hover:border-slate-400 rounded-2xl shadow-sm hover:shadow-md transition duration-200 flex flex-col justify-between">
+                <div>
+                    <div class="w-14 h-14 mb-6 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="w-8 h-8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l5.654-4.654m6.877-1.186l1.493-1.493a3.75 3.75 0 00-5.304-5.304l-1.493 1.493m5.304 5.304l-2.47 2.47m-2.834-2.834l-2.47 2.47" />
+                        </svg>
+                    </div>
+                    <h3 class="mb-3 text-xl font-bold text-slate-800">IT & System Troubleshooting</h3>
+                    <p class="text-slate-600 leading-relaxed mb-6">
+                        Rapid-response diagnosis and resolution of system glitches, server outages, networking bottlenecks, and software anomalies.
+                    </p>
+                </div>
+                <a href="{% url 'core:service_troubleshooting' %}" class="inline-flex items-center text-slate-700 hover:text-slate-900 font-semibold">
+                    Read more 
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </a>
+            </div>
+
+            <!-- 6. Real-time Support CTA -->
+            <div class="p-8 bg-gradient-to-br from-slate-700 to-slate-800 text-white rounded-2xl shadow-md flex flex-col justify-between">
+                <div>
+                    <div class="w-14 h-14 mb-6 rounded-xl bg-white/10 flex items-center justify-center text-slate-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="w-8 h-8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
+                        </svg>
+                    </div>
+                    <h3 class="mb-3 text-xl font-bold">Need Immediate Help?</h3>
+                    <p class="text-slate-300 leading-relaxed mb-6">
+                        Connect with one of our specialized engineers right now using our live chat support located at the bottom-right corner of your screen.
+                    </p>
+                </div>
+                <div>
+                    <span class="inline-block px-4 py-2 bg-slate-900 text-white font-semibold rounded-xl text-sm border border-slate-600">
+                        Live Chat Available 24/7
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Why Choose valCRI Section -->
+    <div class="mt-20 py-12 px-8 bg-slate-50 rounded-2xl border border-slate-200">
+        <h2 class="text-3xl font-bold text-slate-900 text-center mb-10">Why Organizations Trust valCRI</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 text-center">
+                <div class="text-3xl font-extrabold text-slate-700 mb-2">99.9%</div>
+                <h4 class="font-bold text-slate-800 text-lg mb-2">Reliability & Uptime</h4>
+                <p class="text-slate-600 text-sm">Engineered infrastructure ensuring continuous uptime and peak performance for all services.</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 text-center">
+                <div class="text-3xl font-extrabold text-slate-700 mb-2">&lt; 15m</div>
+                <h4 class="font-bold text-slate-800 text-lg mb-2">Rapid Response Time</h4>
+                <p class="text-slate-600 text-sm">Direct access to experienced technical engineers who diagnose and resolve issues without delay.</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 text-center">
+                <div class="text-3xl font-extrabold text-slate-700 mb-2">End-to-End</div>
+                <h4 class="font-bold text-slate-800 text-lg mb-2">Complete Tech Stack</h4>
+                <p class="text-slate-600 text-sm">One cohesive organization handling design, code, server hosting, remote access, and troubleshooting.</p>
+            </div>
+        </div>
+    </div>
 {% endblock %}
