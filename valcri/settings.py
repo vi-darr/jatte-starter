@@ -30,8 +30,8 @@ ALLOWED_HOSTS = []
 AUTH_USER_MODEL = 'account.User'
 
 LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/chat-admin/'
-LOGOUT_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/chat-agent/'
+LOGOUT_REDIRECT_URL = '/login/'
 
 # Application definition
 
@@ -55,6 +55,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'account.middleware.SessionTimeoutMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -139,3 +140,11 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ── Session timeout settings ──
+SESSION_COOKIE_AGE = 28800              # 8 hours — hard upper bound for the cookie
+SESSION_SAVE_EVERY_REQUEST = True        # Update session on every request (keeps idle timer accurate)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True   # Also expire when browser closes
+
+SESSION_IDLE_TIMEOUT = 1800              # 30 minutes of inactivity → logout
+SESSION_ABSOLUTE_TIMEOUT = 28800         # 8 hours of continuous use → logout

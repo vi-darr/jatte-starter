@@ -1,74 +1,146 @@
-{% extends 'core/base.html' %}
+{% extends 'core/base_admin.html' %}
 
 {% block content %}
-   <h1 class="text-2xl">User {{ user.name }}</h1>
+<!-- User header with online/last-active status -->
+<div class="flex justify-between items-center">
+    <div class="flex items-center gap-4">
+        <h1 class="text-2xl">{{ user.get_role_display }} {{ user.name }}</h1>
 
-   <hr class="my-6">
-
-   <!-- Agent Performance Summary -->
-   {% if total_ratings > 0 %}
-       <div class="mt-8 p-6 bg-white border border-gray-200 rounded-xl">
-           <h2 class="mb-4 text-lg"><strong>Performance Summary</strong></h2>
-
-           <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-               <div class="text-center p-3 bg-gray-50 rounded-xl">
-                   <p class="text-sm text-gray-500">Total Ratings</p>
-                   <p class="text-2xl font-bold text-gray-800">{{ total_ratings }}</p>
-               </div>
-               <div class="text-center p-3 bg-gray-50 rounded-xl">
-                   <p class="text-sm text-gray-500">Overall</p>
-                   <p class="text-2xl font-bold text-yellow-500">{{ averages.avg_overall|floatformat:1 }} ★</p>
-               </div>
-               {% if averages.avg_responsiveness %}
-               <div class="text-center p-3 bg-gray-50 rounded-xl">
-                   <p class="text-sm text-gray-500">Responsiveness</p>
-                   <p class="text-2xl font-bold text-yellow-500">{{ averages.avg_responsiveness|floatformat:1 }} ★</p>
-               </div>
-               {% endif %}
-               {% if averages.avg_helpfulness %}
-               <div class="text-center p-3 bg-gray-50 rounded-xl">
-                   <p class="text-sm text-gray-500">Helpfulness</p>
-                   <p class="text-2xl font-bold text-yellow-500">{{ averages.avg_helpfulness|floatformat:1 }} ★</p>
-               </div>
-               {% endif %}
-           </div>
-
-           <!-- Recent Ratings -->
-           {% if recent_ratings %}
-               <h3 class="mb-3 text-md font-semibold text-gray-600">Recent Ratings</h3>
-               <div class="space-y-2">
-                   {% for rating in recent_ratings %}
-                       <div class="flex items-center justify-between p-3 rounded-lg {% cycle 'bg-gray-50' 'bg-white' %}">
-                           <div>
-                               <span class="font-medium text-gray-800">{{ rating.client_name }}</span>
-                               <span class="text-xs text-gray-400 ml-2">{{ rating.created_at|timesince }} ago</span>
-                           </div>
-                           <div class="flex items-center gap-3">
-                               <span class="text-yellow-500 font-bold">{{ rating.overall_rating }}/5 ★</span>
-                               {% if rating.comment %}
-                                   <span class="text-xs text-gray-500 max-w-[200px] truncate" title="{{ rating.comment }}">"{{ rating.comment }}"</span>
-                               {% endif %}
-                           </div>
-                       </div>
-                   {% endfor %}
-               </div>
-           {% endif %}
-       </div>
-   {% else %}
-       <div class="mt-8 p-4 bg-gray-50 rounded-xl">
-           <p class="text-gray-500">No ratings received yet.</p>
-       </div>
-   {% endif %}
-
-   <hr class="my-6">
-
-   <div class="mt-8">
-        <h2 class="mb-4 text-lg"><strong>Rooms</strong></h2>
-
-        {% if rooms %}
-            {% include 'partials/room_grid.html' %}
+        {% if is_online %}
+        <span
+            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+            <span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
+            Online
+        </span>
+        {% elif last_active %}
+        <span
+            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+            <span class="w-2 h-2 rounded-full bg-gray-400 inline-block"></span>
+            Last active {{ last_active|timesince }} ago
+        </span>
         {% else %}
-            <p>No rooms found for this user.</p>
+        <span
+            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
+            <span class="w-2 h-2 rounded-full bg-gray-300 inline-block"></span>
+            Offline
+        </span>
         {% endif %}
     </div>
+    <a href="{% url 'administration:dashboard' %}" class="text-sm text-gray-500 underline">&larr; Back to Dashboard</a>
+</div>
+
+<hr class="my-6">
+
+<!-- Performance Summary -->
+<div class="mt-8 p-6 bg-white border border-gray-200 rounded-xl">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg"><strong>Performance Summary</strong></h2>
+
+        <!-- Period filter (applies to rooms handled & summaries only) -->
+        <div class="flex gap-2">
+            <a href="?period=today"
+                class="px-3 py-1 rounded-lg text-sm {% if current_period == 'today' %}bg-slate-700 text-white{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
+                Today
+            </a>
+            <a href="?period=week"
+                class="px-3 py-1 rounded-lg text-sm {% if current_period == 'week' %}bg-slate-700 text-white{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
+                This Week
+            </a>
+            <a href="?period=month"
+                class="px-3 py-1 rounded-lg text-sm {% if current_period == 'month' %}bg-slate-700 text-white{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
+                This Month
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+        <!-- Period-filtered stats -->
+        <div class="text-center p-3 bg-gray-50 rounded-xl">
+            <p class="text-sm text-gray-500">Rooms Handled</p>
+            <p class="text-2xl font-bold text-gray-800">{{ rooms_handled_count }}</p>
+        </div>
+        <div class="text-center p-3 bg-gray-50 rounded-xl">
+            <p class="text-sm text-gray-500">Summaries Written</p>
+            <p class="text-2xl font-bold text-gray-800">{{ summaries_written_count }}</p>
+        </div>
+
+        <!-- All-time rating stats -->
+        {% if averages.avg_overall %}
+        <div class="text-center p-3 bg-gray-50 rounded-xl">
+            <p class="text-sm text-gray-500">Overall</p>
+            <p class="text-2xl font-bold text-yellow-500">{{ averages.avg_overall|floatformat:1 }} ★</p>
+        </div>
+        {% endif %}
+        {% if averages.avg_responsiveness %}
+        <div class="text-center p-3 bg-gray-50 rounded-xl">
+            <p class="text-sm text-gray-500">Responsiveness</p>
+            <p class="text-2xl font-bold text-yellow-500">{{ averages.avg_responsiveness|floatformat:1 }} ★</p>
+        </div>
+        {% endif %}
+        {% if averages.avg_helpfulness %}
+        <div class="text-center p-3 bg-gray-50 rounded-xl">
+            <p class="text-sm text-gray-500">Helpfulness</p>
+            <p class="text-2xl font-bold text-yellow-500">{{ averages.avg_helpfulness|floatformat:1 }} ★</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Recent Ratings -->
+    {% if recent_ratings %}
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="mb-3 text-md font-semibold text-gray-600">Recent Ratings</h3>
+
+        <a href="{% url 'administration:user_ratings' user.pk %}" class="text-sm text-gray-500 underline">More &rarr;</a>
+    </div>
+    <div class="space-y-2">
+        {% for rating in recent_ratings %}
+        <div class="flex items-center justify-between p-3 rounded-lg {% cycle 'bg-gray-50' 'bg-white' %}">
+            <div>
+                <span class="font-medium text-gray-800">{{ rating.client_name }}</span>
+                <span class="text-xs text-gray-400 ml-2">{{ rating.created_at|timesince }} ago</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-yellow-500 font-bold">{{ rating.overall_rating }}/5 ★</span>
+                {% if rating.comment %}
+                <span class="text-xs text-gray-500 max-w-[200px] truncate" title="rating comment">"{{ rating.comment }}"</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<hr class="my-6">
+
+<!-- Rooms table (replaces room grid) -->
+<div class="mt-8">
+    <h2 class="mb-4 text-lg"><strong>Rooms</strong></h2>
+
+    <div id="room-list-container">
+        {% include 'partials/recordlist.html' %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentPeriod = '{{ current_period|default:"today" }}';
+
+    function loadRoomPage(page, period) {
+        period = period || currentPeriod;
+        const container = document.getElementById('room-list-container');
+        container.style.opacity = '0.5';
+
+        fetch(`{% url 'administration:room_list_partial' %}?page=${page}&period=${period}`)
+            .then(response => response.text())
+            .then(html => {
+                container.innerHTML = html;
+                container.style.opacity = '1';
+            })
+            .catch(() => {
+                container.style.opacity = '1';
+            });
+    }
+</script>
 {% endblock %}

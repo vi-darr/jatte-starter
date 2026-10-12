@@ -6,16 +6,16 @@ from django.db.models import Avg, Count
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.contrib.auth.models import Group
-from django.contrib.sessions.models import Session
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 
-from chat.models import Room, Message, ServiceRating
 from account.models import User
 from account.forms import AddUserForm, EditUserForm
-
-from .models import Report
-from .forms import GenerateReportForm, ReportFilterForm    
+from account.utils import get_active_user_ids, get_user_online_status
+from chat.models import Room, ServiceRating, ConvoSummary
+ 
+from datetime import datetime
+from django.conf import settings as conf 
 
 def _get_period_range(period):
     """Return (start, end) datetimes for the given filter period."""
@@ -33,15 +33,8 @@ def _get_period_range(period):
 
 
 def _get_active_agents_count():
-    """Count staff users with a non-expired session (i.e. currently logged in)."""
-    now = timezone.now()
-    active_sessions = Session.objects.filter(expire_date__gt=now)
-    user_ids = set()
-    for session in active_sessions:
-        data = session.get_decoded()
-        uid = data.get('_auth_user_id')
-        if uid:
-            user_ids.add(uid)
+    """Count staff users whose session is genuinely active."""
+    user_ids = get_active_user_ids()
     if not user_ids:
         return 0
     return User.objects.filter(pk__in=user_ids, is_staff=True).count()
@@ -79,7 +72,6 @@ def dashboard(request):
         count=Count('id'),
     )
 
-    recent_reports = Report.objects.all()[:5]
 
     return render(request, 'dashboard.html', {
         'users': users,
@@ -92,7 +84,6 @@ def dashboard(request):
         'total_agents': total_agents,
         'active_agents': active_agents,
         'rating_agg': rating_agg,
-        'recent_reports': recent_reports,
     })
 
 
@@ -184,7 +175,7 @@ def all_rooms(request):
 
     agents = User.objects.filter(is_staff=True).order_by('name')
 
-    return render(request, 'all_rooms.html', {
+    return render(request, 'reports/all_rooms.html', {
         'rooms': rooms_page,
         'agents': agents,
         'current_date_from': date_from or '',
@@ -214,7 +205,7 @@ def add_user(request):
 
                 messages.success(request, 'User added successfully.')
 
-                return redirect('/administration/')
+                return redirect('/admin-dashboard   /')
         else:
             form = AddUserForm()
 
@@ -224,20 +215,50 @@ def add_user(request):
     else:
         messages.error(request, 'You do not have permission to add users.')
 
-        return redirect('/administration/')
+        return redirect('/admin-dashboard/')
 
 
 @login_required
 def user_details(request, uuid):
     user = User.objects.get(pk=uuid)
-    rooms = user.rooms.all().select_related('agent', 'rating').prefetch_related('summaries__agent')
 
-    # Agent performance stats
+    # ── Online / last-active status ──
+    is_online, last_active = get_user_online_status(user)
+
+    now = timezone.now()
+
+    # ── Period filter for rooms & summaries ──
+    period = request.GET.get('period', 'today')
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    if period == 'week':
+        period_start = today_start - timedelta(days=today_start.weekday())
+    elif period == 'month':
+        period_start = today_start.replace(day=1)
+    else:
+        period_start = today_start
+
+    rooms_in_period = Room.objects.filter(
+        agent=user, created_at__gte=period_start, created_at__lte=now,
+    )
+    rooms_handled_count = rooms_in_period.count()
+    summaries_written_count = ConvoSummary.objects.filter(
+        agent=user, created_at__gte=period_start, created_at__lte=now,
+    ).count()
+
+     # ── Paginated room list (filtered by period) ──
+    filtered_rooms = rooms_in_period.select_related(
+        'agent', 'rating',
+    ).prefetch_related('summaries__agent')
+    paginator = Paginator(filtered_rooms, 10)
+    page_number = request.GET.get('page')
+    rooms_page = paginator.get_page(page_number)
+
+    # ── Ratings (not filterable — always all-time) ──
     agent_ratings = ServiceRating.objects.filter(agent=user)
     total_ratings = agent_ratings.count()
 
     if total_ratings > 0:
-        from django.db.models import Avg
         averages = agent_ratings.aggregate(
             avg_overall=Avg('overall_rating'),
             avg_responsiveness=Avg('responsiveness'),
@@ -246,14 +267,47 @@ def user_details(request, uuid):
     else:
         averages = {}
 
-    recent_ratings = agent_ratings[:10]
+    recent_ratings = agent_ratings[:5]
 
     return render(request, 'staff/user_details.html', {
         'user': user,
-        'rooms': rooms,
+        'is_online': is_online,
+        'last_active': last_active,
+        'rooms': rooms_page,
+        'current_period': period,
+        'rooms_handled_count': rooms_handled_count,
+        'summaries_written_count': summaries_written_count,
         'total_ratings': total_ratings,
         'averages': averages,
         'recent_ratings': recent_ratings,
+    })
+
+@login_required
+def user_ratings(request, uuid):
+    user = User.objects.get(pk=uuid)
+
+    agent_ratings = ServiceRating.objects.filter(agent=user)
+    total_ratings = agent_ratings.count()
+    
+    if total_ratings > 0:
+        averages = agent_ratings.aggregate(
+            avg_overall=Avg('overall_rating'),
+            avg_responsiveness=Avg('responsiveness'),
+            avg_helpfulness=Avg('helpfulness'),
+        )
+    else:
+        averages = {}
+
+    paginator = Paginator(agent_ratings, 10)
+    page_number = request.GET.get('page')
+    rooms_page = paginator.get_page(page_number)
+
+    return render(request, 'staff/user_ratings.html', {
+        'user': user,
+        'ratings': agent_ratings,
+        'total_ratings': total_ratings,
+        'averages': averages,
+        'rooms': rooms_page,
     })
 
 @login_required
@@ -269,7 +323,7 @@ def edit_user(request, uuid):
 
                 messages.success(request, 'User updated successfully.')
 
-                return redirect('/administration/')
+                return redirect('/admin-dashboard/')
         else:
             form = EditUserForm(instance=user)
 
@@ -280,88 +334,69 @@ def edit_user(request, uuid):
     else:
         messages.error(request, 'You do not have permission to edit users.')
 
-        return redirect('/administration/')
+        return redirect('/admin-dashboard/')
 
 
 @login_required
-def report_list(request):
-    """List all generated reports with optional period filter."""
-    filter_form = ReportFilterForm(request.GET)
-    reports = Report.objects.all()
+def user_dashboard(request):
+    user = User.objects.get(pk=request.user.pk)
 
-    if filter_form.is_valid():
-        period = filter_form.cleaned_data.get('period')
-        if period:
-            reports = reports.filter(period=period)
+    # ── Online / last-active status ──
+    is_online, last_active = get_user_online_status(user)
 
-    return render(request, 'reports/report_list.html', {
-        'reports': reports,
-        'filter_form': filter_form,
-    })
+    now = timezone.now()
 
+    # ── Period filter for rooms & summaries ──
+    period = request.GET.get('period', 'today')
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
-@login_required
-def report_detail(request, pk):
-    """View a single report's details."""
-    report = get_object_or_404(Report, pk=pk)
-    return render(request, 'reports/report_detail.html', {
-        'report': report,
-    })
-
-
-@login_required
-def generate_report(request):
-    """Generate a new report by computing metrics for the chosen period."""
-    if request.method == 'POST':
-        form = GenerateReportForm(request.POST)
-        if form.is_valid():
-            report = form.save(commit=False)
-            report.created_by = request.user
-
-            start = report.period_start
-            end = report.period_end
-
-            # Compute snapshot metrics for the period
-            rooms_in_period = Room.objects.filter(created_at__gte=start, created_at__lte=end)
-            report.total_rooms = rooms_in_period.count()
-            report.active_rooms = rooms_in_period.filter(status=Room.ACTIVE).count()
-            report.closed_rooms = rooms_in_period.filter(status=Room.CLOSED).count()
-            report.waiting_rooms = rooms_in_period.filter(status=Room.WAITING).count()
-
-            ratings_in_period = ServiceRating.objects.filter(
-                created_at__gte=start, created_at__lte=end
-            )
-            report.total_ratings = ratings_in_period.count()
-
-            agg = ratings_in_period.aggregate(
-                avg_overall=Avg('overall_rating'),
-                avg_responsiveness=Avg('responsiveness'),
-                avg_helpfulness=Avg('helpfulness'),
-            )
-            report.avg_overall_rating = agg['avg_overall']
-            report.avg_responsiveness = agg['avg_responsiveness']
-            report.avg_helpfulness = agg['avg_helpfulness']
-
-            report.save()
-
-            messages.success(request, 'Report generated successfully.')
-            return redirect('administration:report_detail', pk=report.pk)
+    if period == 'week':
+        period_start = today_start - timedelta(days=today_start.weekday())
+    elif period == 'month':
+        period_start = today_start.replace(day=1)
     else:
-        form = GenerateReportForm()
+        period_start = today_start
 
-    return render(request, 'reports/generate_report.html', {
-        'form': form,
+    rooms_in_period = Room.objects.filter(
+        agent=user, created_at__gte=period_start, created_at__lte=now,
+    )
+    rooms_handled_count = rooms_in_period.count()
+    summaries_written_count = ConvoSummary.objects.filter(
+        agent=user, created_at__gte=period_start, created_at__lte=now,
+    ).count()
+
+     # ── Paginated room list (filtered by period) ──
+    filtered_rooms = rooms_in_period.select_related(
+        'agent', 'rating',
+    ).prefetch_related('summaries__agent')
+    paginator = Paginator(filtered_rooms, 10)
+    page_number = request.GET.get('page')
+    rooms_page = paginator.get_page(page_number)
+
+    # ── Ratings (not filterable — always all-time) ──
+    agent_ratings = ServiceRating.objects.filter(agent=user)
+    total_ratings = agent_ratings.count()
+
+    if total_ratings > 0:
+        averages = agent_ratings.aggregate(
+            avg_overall=Avg('overall_rating'),
+            avg_responsiveness=Avg('responsiveness'),
+            avg_helpfulness=Avg('helpfulness'),
+        )
+    else:
+        averages = {}
+
+    recent_ratings = agent_ratings[:10]
+
+    return render(request, 'staff/user_dashboard.html', {
+        'user': user,
+        'is_online': is_online,
+        'last_active': last_active,
+        'rooms': rooms_page,
+        'current_period': period,
+        'rooms_handled_count': rooms_handled_count,
+        'summaries_written_count': summaries_written_count,
+        'total_ratings': total_ratings,
+        'averages': averages,
+        'recent_ratings': recent_ratings,
     })
-
-
-@login_required
-def delete_report(request, pk):
-    """Delete a report (POST only)."""
-    report = get_object_or_404(Report, pk=pk)
-
-    if request.method == 'POST':
-        report.delete()
-        messages.success(request, 'Report deleted.')
-        return redirect('administration:report_list')
-
-    return redirect('administration:report_detail', pk=pk)

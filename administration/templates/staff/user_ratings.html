@@ -1,0 +1,114 @@
+{% extends 'core/base_admin.html' %}
+
+{% block content %}
+<!-- User header with online/last-active status -->
+<div class="flex justify-between items-center">
+    <h1 class="text-2xl">{{ user.get_role_display }} {{ user.name }} Ratings</h1>
+    <a href="{% url 'administration:user_details' user.pk %}" class="text-sm text-gray-500 underline">&larr; Back </a>
+</div>
+
+<hr class="my-6">
+
+<!-- Performance Summary -->
+<div class="mt-8 p-6 bg-white border border-gray-200 rounded-xl">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg"><strong>Performance Summary</strong></h2>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+        <!-- All-time rating stats -->
+        {% if averages.avg_overall %}
+        <div class="text-center p-3 bg-gray-50 rounded-xl">
+            <p class="text-sm text-gray-500">Overall</p>
+            <p class="text-2xl font-bold text-yellow-500">{{ averages.avg_overall|floatformat:1 }} ★</p>
+        </div>
+        {% endif %}
+        {% if averages.avg_responsiveness %}
+        <div class="text-center p-3 bg-gray-50 rounded-xl">
+            <p class="text-sm text-gray-500">Responsiveness</p>
+            <p class="text-2xl font-bold text-yellow-500">{{ averages.avg_responsiveness|floatformat:1 }} ★</p>
+        </div>
+        {% endif %}
+        {% if averages.avg_helpfulness %}
+        <div class="text-center p-3 bg-gray-50 rounded-xl">
+            <p class="text-sm text-gray-500">Helpfulness</p>
+            <p class="text-2xl font-bold text-yellow-500">{{ averages.avg_helpfulness|floatformat:1 }} ★</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <hr class="my-6">
+
+    <div class="mt-8">
+        <h2 class="mb-4 text-lg"><strong>Ratings</strong></h2>
+
+        <div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-gray-800 text-white">
+                        <tr>
+                            <th class="px-4 py-3 rounded-tl-lg">Created By</th>
+                            <th class="px-4 py-3">Created At</th>
+                            <th class="px-4 py-3">Overall Rating</th>
+                            <th class="px-4 py-3">Responsiveness</th>
+                            <th class="px-4 py-3">Helpfulness</th>
+                            <th class="px-4 py-3 rounded-tr-lg">Comment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for room in rooms %}
+                            <tr class="border-b {% cycle 'bg-gray-50' 'bg-white' %}">
+                                <td class="px-4 py-3 font-medium text-gray-800">{{ room.client_name }}</td>
+                                <td class="px-4 py-3">{{ room.created_at|date:"M d, H:i" }}</td>
+                                <td class="px-4 py-3 text-yellow-500 font-bold">{{ room.overall_rating }}/5 ★</td>
+                                <td class="px-4 py-3 text-yellow-500 font-bold">{{ room.responsiveness }}/5 ★</td>
+                                <td class="px-4 py-3 text-yellow-500 font-bold">{{ room.helpfulness }}/5 ★</td>
+                                <td class="px-4 py-3">{{ room.comment }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="px-4 py-6 text-center text-gray-500">No ratings found.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if rooms.has_other_pages %}
+                <div class="flex justify-between items-center mt-4">
+                    <div>
+                        {% if rooms.has_previous %}
+                            <a href="?page={{ rooms.previous_page_number }}"
+                                class="inline-block py-2 px-4 bg-gray-800 text-white rounded-xl text-sm">
+                                &larr; Previous
+                            </a>
+                        {% else %}
+                            <span class="inline-block py-2 px-4 bg-gray-300 text-gray-500 rounded-xl text-sm cursor-not-allowed">
+                                &larr; Previous
+                            </span>
+                        {% endif %}
+                    </div>
+                    <span class="text-sm text-gray-500">
+                        Page {{ rooms.number }} of {{ rooms.paginator.num_pages }}
+                    </span>
+                    <div>
+                        {% if rooms.has_next %}
+                            <a href="?page={{ rooms.next_page_number }}"
+                            class="inline-block py-2 px-4 bg-gray-800 text-white rounded-xl text-sm">
+                                Next &rarr;
+                            </a>
+                        {% else %}
+                            <span class="inline-block py-2 px-4 bg-gray-300 text-gray-500 rounded-xl text-sm cursor-not-allowed">
+                                Next &rarr;
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+

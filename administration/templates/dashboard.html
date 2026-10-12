@@ -1,9 +1,11 @@
-{% extends 'core/base.html' %}
+{% extends 'core/base_admin.html' %}
 
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<h1 class="text-2xl font-bold">Administration Dashboard</h1>
+<h1 class="text-2xl font-bold">Admin Dashboard</h1>
+
+<hr class="my-6">
 
 {% if perms.user.add_user %}
         <div class="mt-8">
@@ -28,25 +30,27 @@
                 {% endfor %}
             </div>
 
-            <a href="{% url 'administration:add_user' %}" class="inline-block py-2 px-6 bg-rose-600 text-white rounded-xl">Add User</a>
+            <a href="{% url 'administration:add_user' %}" class="inline-block py-2 px-6 bg-slate-700 text-white rounded-xl">Add User</a>
         </div>
 {% endif %}
+
+<hr class="my-6">
 
 <div class="flex justify-between items-center mt-6">
    <!-- Period filter buttons -->
     <div class="flex space-x-2" id="period-filters">
         <button onclick="filterPeriod('today')"
-            class="py-2 px-4 rounded-xl text-sm {% if current_period == 'today' %}bg-rose-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %}"
+            class="py-2 px-4 rounded-xl text-sm {% if current_period == 'today' %}bg-slate-700 text-white{% else %}bg-gray-200 text-gray-700{% endif %}"
             data-period="today">
             Today
         </button>
         <button onclick="filterPeriod('week')"
-            class="py-2 px-4 rounded-xl text-sm {% if current_period == 'week' %}bg-rose-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %}"
+            class="py-2 px-4 rounded-xl text-sm {% if current_period == 'week' %}bg-slate-700 text-white{% else %}bg-gray-200 text-gray-700{% endif %}"
             data-period="week">
             This Week
         </button>
         <button onclick="filterPeriod('month')"
-            class="py-2 px-4 rounded-xl text-sm {% if current_period == 'month' %}bg-rose-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %}"
+            class="py-2 px-4 rounded-xl text-sm {% if current_period == 'month' %}bg-slate-700 text-white{% else %}bg-gray-200 text-gray-700{% endif %}"
             data-period="month">
             This Month
         </button>
@@ -119,30 +123,7 @@
         {% include 'partials/recordlist.html' %}
     </div>
 </div>
-<div class="mt-10">
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-semibold">Recent Reports</h2>
-        <div class="space-x-2">
-            <a href="{% url 'administration:report_list' %}" class="inline-block py-2 px-4 bg-gray-200 rounded-xl text-sm">All Reports</a>
-            <a href="{% url 'administration:generate_report' %}" class="inline-block py-2 px-4 bg-rose-600 text-white rounded-xl text-sm">Generate Report</a>
-        </div>
-    </div>
 
-    {% if recent_reports %}
-        <div class="space-y-2">
-            {% for report in recent_reports %}
-                <div class="grid grid-cols-4 gap-4 py-3 px-4 rounded-lg {% cycle 'bg-gray-100' '' %}">
-                    <a href="{% url 'administration:report_detail' report.pk %}" class="text-rose-600 underline">{{ report.title }}</a>
-                    <p>{{ report.get_period_display }}</p>
-                    <p>{{ report.period_start|date:"M d, Y" }}</p>
-                    <p class="text-right text-gray-500 text-sm">{{ report.created_at|date:"M d, Y H:i" }}</p>
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <p class="text-gray-500">No reports generated yet.</p>
-    {% endif %}
-</div>
 {% endblock %}
 
 {% block scripts %}
@@ -176,7 +157,7 @@
         // Update button styles
         document.querySelectorAll('#period-filters button').forEach(btn => {
             if (btn.dataset.period === period) {
-                btn.className = 'py-2 px-4 rounded-xl text-sm bg-rose-600 text-white';
+                btn.className = 'py-2 px-4 rounded-xl text-sm bg-slate-700 text-white';
             } else {
                 btn.className = 'py-2 px-4 rounded-xl text-sm bg-gray-200 text-gray-700';
             }
