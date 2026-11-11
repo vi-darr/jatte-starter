@@ -4,7 +4,7 @@
 <!-- User header with online/last-active status -->
 <div class="flex justify-between items-center">
     <div class="flex items-center gap-4">
-        <h1 class="text-2xl">{{ user.get_role_display }} {{ user.name }}</h1>
+        <h1 class="text-2xl">Welcome, {{ user.get_role_display }} {{ user.name }}</h1>
 
         {% if is_online %}
         <span
@@ -110,12 +110,12 @@
 
 <hr class="my-6">
 
-<!-- Rooms table (replaces room grid) -->
+
 <div class="mt-8">
     <h2 class="mb-4 text-lg"><strong>Rooms</strong></h2>
 
     <div id="room-list-container">
-        {% include 'partials/recordlist.html' %}
+        {% include 'partials/room_grid.html' %}
     </div>
 </div>
 {% endblock %}

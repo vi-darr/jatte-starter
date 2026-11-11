@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
+from django.core.paginator import Paginator
 from django.contrib import messages
 
 from .models import Room, ConvoSummary, ServiceRating
@@ -48,10 +49,13 @@ def close_room(request, uuid):
 
 @login_required
 def chat_agent(request):
-    rooms = Room.objects.filter(status__in=[Room.WAITING, Room.ACTIVE]).order_by('-created_at')
+    rooms =Room.objects.filter(status__in=[Room.WAITING, Room.ACTIVE]).order_by('-created_at')
+    paginator = Paginator(rooms, 20)
+    page_number = request.GET.get('page')
+    rooms_page = paginator.get_page(page_number)
 
     return render(request, 'chat/chat_agent.html', {
-        'rooms': rooms,
+        'rooms': rooms_page,
     })
 
 @login_required
@@ -86,17 +90,17 @@ def delete_room(request, uuid):
         room = Room.objects.get(uuid=uuid)
         if room.status != Room.CLOSED:
             messages.error(request, 'Cannot delete an active room.')
-            return redirect('/chat-agent/')
+            return redirect('chat:chat-agent')
         else:
             room.delete()
 
         messages.success(request, 'Room deleted.')
         
-        return redirect('/chat-agent/')
+        return redirect('chat:chat-agent')
     else:
         messages.error(request, 'You do not have permission to delete rooms.')
         
-        return redirect('/chat-agent/')
+        return redirect('chat:chat-agent')
 
 @login_required
 @require_POST

@@ -30,7 +30,7 @@ ALLOWED_HOSTS = []
 AUTH_USER_MODEL = 'account.User'
 
 LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/chat-agent/'
+LOGIN_REDIRECT_URL = '/user-dashboard/'
 LOGOUT_REDIRECT_URL = '/login/'
 
 # Application definition

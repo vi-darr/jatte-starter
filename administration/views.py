@@ -59,7 +59,7 @@ def dashboard(request):
 
     # Paginated room list (unfiltered – shows all rooms)
     filtered_rooms = rooms_in_period.select_related('agent', 'rating').prefetch_related('summaries__agent')
-    paginator = Paginator(filtered_rooms, 10)
+    paginator = Paginator(filtered_rooms, 20)
     page_number = request.GET.get('page')
     rooms_page = paginator.get_page(page_number)
 
@@ -143,7 +143,7 @@ def room_list_partial(request):
         start, end = _get_period_range(period)
         rooms = rooms.filter(created_at__gte=start, created_at__lte=end)
 
-    paginator = Paginator(rooms, 10)
+    paginator = Paginator(rooms, 20)
     page_number = request.GET.get('page')
     rooms_page = paginator.get_page(page_number)
 
@@ -169,7 +169,7 @@ def all_rooms(request):
     if agent_id:
         rooms = rooms.filter(agent_id=agent_id)
 
-    paginator = Paginator(rooms, 10)
+    paginator = Paginator(rooms, 20)
     page_number = request.GET.get('page')
     rooms_page = paginator.get_page(page_number)
 
@@ -197,15 +197,19 @@ def add_user(request):
                 user.save()
 
                 if user.role == User.MANAGER:
+                    user.is_superuser = True
+                    user.save()
                     group = Group.objects.get(name='Managers')
                     group.user_set.add(user)
                 else:
+                    user.is_superuser = False
+                    user.save()
                     group = Group.objects.get(name='Agents')
                     group.user_set.add(user)
 
                 messages.success(request, 'User added successfully.')
 
-                return redirect('/admin-dashboard   /')
+                return redirect('administration:dashboard')
         else:
             form = AddUserForm()
 
@@ -215,7 +219,7 @@ def add_user(request):
     else:
         messages.error(request, 'You do not have permission to add users.')
 
-        return redirect('/admin-dashboard/')
+        return redirect('administration:dashboard')
 
 
 @login_required
@@ -250,7 +254,7 @@ def user_details(request, uuid):
     filtered_rooms = rooms_in_period.select_related(
         'agent', 'rating',
     ).prefetch_related('summaries__agent')
-    paginator = Paginator(filtered_rooms, 10)
+    paginator = Paginator(filtered_rooms, 20)
     page_number = request.GET.get('page')
     rooms_page = paginator.get_page(page_number)
 
@@ -323,7 +327,7 @@ def edit_user(request, uuid):
 
                 messages.success(request, 'User updated successfully.')
 
-                return redirect('/admin-dashboard/')
+                return redirect('administration:dashboard')
         else:
             form = EditUserForm(instance=user)
 
@@ -334,7 +338,7 @@ def edit_user(request, uuid):
     else:
         messages.error(request, 'You do not have permission to edit users.')
 
-        return redirect('/admin-dashboard/')
+        return redirect('administration:dashboard')
 
 
 @login_required
@@ -366,10 +370,8 @@ def user_dashboard(request):
     ).count()
 
      # ── Paginated room list (filtered by period) ──
-    filtered_rooms = rooms_in_period.select_related(
-        'agent', 'rating',
-    ).prefetch_related('summaries__agent')
-    paginator = Paginator(filtered_rooms, 10)
+    filtered_rooms = rooms_in_period.filter(status__in=[Room.CLOSED, Room.ACTIVE]).order_by('-created_at')
+    paginator = Paginator(filtered_rooms, 20)
     page_number = request.GET.get('page')
     rooms_page = paginator.get_page(page_number)
 
